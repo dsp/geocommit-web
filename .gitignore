@@ -1,0 +1,6 @@
+api/src/geocommit/config.clj
+api/classes
+api/lib
+api/resources/WEB-INF
+*~
+*.swp
