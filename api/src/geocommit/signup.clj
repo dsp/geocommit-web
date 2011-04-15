@@ -18,8 +18,7 @@
   (:import (org.apache.commons.validator EmailValidator)
 	   (java.util UUID))
   (:require [compojure.route :as route]
-	    [clojure.contrib.trace :as t]
-	    [appengine-magic.services.mail :as mail]))
+	    [clojure.contrib.trace :as t]))
 
 (def *couchdb* (get-config :databases :invites))
 
@@ -59,11 +58,11 @@
 		     (str "mail:" mailaddr)
 		     (isodate) mailaddr nil false code false "invite")))
       (do
-	(mail/send (mail/make-message
+	(comment (mail/send (mail/make-message
 		    :from "geocommit-team@j03.de"
 		    :to mailaddr
 		    :subject "Welcome to geocommit.com. Please verify your invitation request."
 		    :text-body (str "Welcome to geocommit.com.\n\nFollow the link to verify your invitation request\n\n"
-				    "http://geocommit.com/signup/verify/" code)))
+				    "http://geocommit.com/signup/verify/" code))))
 	{:status 201})
       {:status 400})))

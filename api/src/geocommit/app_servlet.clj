@@ -9,25 +9,31 @@
   geocommit.app_servlet
   (:gen-class :extends javax.servlet.http.HttpServlet)
   (:use compojure.core
+	[compojure.route :as route]
+	[compojure.handler :as handler]
 	[geocommit.hook :only [app-hook]]
 	[geocommit.api :only [app-api-geocommits]]
 	[geocommit.signup :only [app-verify-hook app-signup]]
 	[geocommit.http :only [mslurp]])
-  (:use [appengine-magic.servlet :only [make-servlet-service-method]]
-	[appengine-magic.core :as ae])
   (:require [compojure.route :as route]
 	    [clojure.contrib.trace :as t]))
 
-(defroutes handler
-  (GET "/api/geocommits" [payload] (app-api-geocommits payload))
-  (POST "/api*" payload
+(defroutes main-routes
+  (GET "/api/geocommits"
+       [payload]
+       (app-api-geocommits payload))
+  (POST "/api*"
+	payload
 	(if (= (:content-type payload) "application/githubpostreceive+json")
 	  (app-hook (mslurp (.getInputStream (:request payload))))
 	  (app-hook (:payload (:params payload)))))
-  (GET "/signup/verify/:code" [code] (app-verify-hook code))
-  (POST "/signup*" [mailaddr] (app-signup mailaddr))
+  (GET "/signup/verify/:code"
+       [code]
+       (app-verify-hook code))
+  (POST "/signup*"
+	[mailaddr]
+	(app-signup mailaddr))
   (route/not-found "not a valid request"))
-(ae/def-appengine-app geocommit-application #'handler)
-  
-(defn -service [this request response]
-  ((make-servlet-service-method geocommit-application) this request response))
+
+(def app
+     (handler/site main-routes))

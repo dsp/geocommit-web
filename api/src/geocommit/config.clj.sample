@@ -2,8 +2,7 @@
        :author "David Soria Parra"}
   geocommit.config
   (:use clojure.contrib.logging)
-  (:require [appengine-magic.core :as ae]
-	    [clojure.contrib.trace :as t]))
+  (:require [clojure.contrib.trace :as t]))
 
 (def *config*
      {:production
@@ -28,7 +27,7 @@
    (get-config :foo :bar) will return the {:foo {:bar X}} item."
   [& keys]
   (get-in (*config*
-	   (condp = (ae/appengine-environment-type)
+	   (condp = :testing
 	       :production :production
 	       :testing))
 	 keys))
