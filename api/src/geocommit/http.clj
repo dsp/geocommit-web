@@ -9,24 +9,11 @@
   (:use clojure.contrib.json
 	clojure.contrib.condition
 	clojure.contrib.logging)
-  (:require [clojure.contrib.trace :as t])
+  (:require [clojure.contrib.trace :as t]
+	    [clojure.contrib.duck-streams :as ds])
   (:import (java.net URL HttpURLConnection)
 	   (java.io InputStreamReader BufferedReader PrintWriter BufferedWriter
 		    OutputStreamWriter OutputStream InputStream)))
-
-;; contrib mspit/mslurp as duck-stream use sockets which are not allowed on appengine
-(defn- mspit [#^OutputStream f content]
-  (with-open [#^PrintWriter w (PrintWriter. (BufferedWriter. (OutputStreamWriter. f "UTF-8")))]
-    (.print w content)))
-
-(defn mslurp [#^InputStream f]
-  (with-open [#^BufferedReader r (BufferedReader. (InputStreamReader. f "UTF-8"))]
-    (let [sb (StringBuilder.)]
-      (loop [c (.read r)]
-	(if (neg? c)
-	  (str sb)
-	  (do (.append sb (char c))
-	      (recur (.read r))))))))
 
 (def *default-opts* {:method "GET"
 		     :body nil
@@ -57,9 +44,9 @@
 	(.setDoInput true)
 	(.connect))
       (if (and (:body opts) (= "POST" (:method opts))); better check
-	(mspit (.getOutputStream conn) (:body opts)))
+	(ds/spit (.getOutputStream conn) (:body opts)))
       {:status (.getResponseCode conn)
-       :body (mslurp (.getInputStream conn))})))
+       :body (ds/slurp* (.getInputStream conn))})))
 
 (defn http-call-service
   "Call a http service using http-req.
