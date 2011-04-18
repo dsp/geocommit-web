@@ -10,7 +10,7 @@
   (:gen-class :extends javax.servlet.http.HttpServlet)
   (:use compojure.core
 	[geocommit.hook :only [app-hook]]
-	[geocommit.api :only [app-api-geocommits]]
+	[geocommit.api :only [app-api-geocommits app-api-geocommit]]
 	[geocommit.signup :only [app-verify-hook app-signup]])
   (:require [clojure.contrib.trace :as t]
 	    [compojure.route :as route]
@@ -21,6 +21,9 @@
   (GET "/geocommits"
        [payload]
        (app-api-geocommits payload))
+  (GET "/geocommit/:id"
+       [id]
+       (app-api-geocommit id))
   (GET "/signup/verify/:code"
        [code]
        (app-verify-hook code))

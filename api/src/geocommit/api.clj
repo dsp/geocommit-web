@@ -18,3 +18,8 @@
 (defn app-api-geocommits
   [payload]
   (json-str (:rows (couch-view *couchdb* "views" "geocommits"))))
+
+(defn app-api-geocommit
+  [id]
+  (json-str
+   (:doc (first (:rows (couch-view *couchdb* "views" "geocommit" [id] {:include_docs true}))))))
