@@ -1,4 +1,8 @@
 function geocommit_map(z) {
+    if (!document.getElementById("map_canvas")) {
+        return;
+    }
+
     var c = new google.maps.LatLng(30, -10);
     var m = new google.maps.Map(
             document.getElementById("map_canvas"),

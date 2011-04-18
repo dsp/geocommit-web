@@ -1,5 +1,14 @@
 package bootstrap.liftweb
 
+
+import _root_.net.liftweb.common._
+import _root_.scala.xml.{Node, NodeSeq, Elem}
+import _root_.net.liftweb.util._
+import _root_.net.liftweb.util.Helpers._
+import java.io.{Writer, InputStream}
+
+import dispatch._
+
 import net.liftweb._
 import util._
 import Helpers._
@@ -11,6 +20,56 @@ import Loc._
 import mapper._
 
 import code.model._
+
+import net.liftweb.http._
+import net.liftweb.http.rest._
+
+object ApiProxy extends RestHelper {
+    serve {
+        case Req("api" :: "geocommits" :: Nil, _, GetRequest) => {
+            var response: String = ""
+            val http = new Http
+            val req = :/("localhost", 3000) / "geocommits"
+            http(req >- {response = _})
+            new PlainTextResponse(response, List(), 200)
+        }
+    }
+}
+
+final case class GeocommitHtmlProperties(userAgent: Box[String]) extends HtmlProperties {
+    def docType: Box[String] = Full("<!DOCTYPE html>")
+    def encoding: Box[String] = Empty
+
+    def contentType: Box[String] = {
+        Full("text/html; charset=utf-8")
+    }
+
+    //def htmlParser: InputStream => Box[Elem] = Html5.parse _
+    def htmlParser: InputStream => Box[NodeSeq] = PCDataXmlParser.apply _
+
+    //def htmlWriter: (Node, Writer) => Unit = Html5.write(_, _, false)
+    def htmlWriter: (Node, Writer) => Unit = (n: Node, w: Writer) => {
+        val sb = new StringBuilder(64000)
+        AltXML.toXML(n,
+            _root_.scala.xml.TopScope,
+            sb, false,
+            !LiftRules.convertToEntity.vend,
+            S.ieMode)
+        w.append(sb)
+        w.flush()
+    }
+
+    def htmlOutputHeader: Box[String] = docType.map(_ + "\n")
+
+    val html5FormsSupport: Boolean = {
+        val r = S.request openOr Req.nil
+        r.isSafari5 || r.isFirefox36 || r.isFirefox40 ||
+        r.isChrome5 || r.isChrome6
+    }
+
+    val maxOpenRequests: Int =
+        LiftRules.maxConcurrentRequests.vend(S.request openOr Req.nil)
+}
 
 
 /**
@@ -43,18 +102,21 @@ class Boot {
         def sitemap = SiteMap(
             Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
-            Menu.i("Full Map") / "full",
+            Menu.i("Full Map") / "full"//,
 
             // more complex because this menu allows anything in the
             // /static path to be visible
-            Menu(Loc("Static", Link(List("static"), true, "/static/index"),
-                "Static Content")))
+            //Menu(Loc("Static", Link(List("static"), true, "/static/index"),
+            //  "Static Content")))
+        )
 
         def sitemapMutators = User.sitemapMutator
 
         // set the sitemap.  Note if you don't want access control for
         // each page, just comment this line out.
         LiftRules.setSiteMapFunc(() => sitemapMutators(sitemap))
+
+        LiftRules.statelessDispatchTable.append(ApiProxy)
 
         //Show the spinny image when an Ajax call starts
         LiftRules.ajaxStart =
@@ -71,9 +133,14 @@ class Boot {
         LiftRules.loggedInTest = Full(() => User.loggedIn_?)
 
         // Use HTML5 for rendering
+        //LiftRules.htmlProperties.default.set(
+//            (r: Req) => new Html5Properties(r.userAgent))
+
+        LiftRules.htmlProperties.default.set(
+            (r: Req) => new GeocommitHtmlProperties(r.userAgent))
 
         // Use jQuery 1.4
-        LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts
+        //LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts
 
         // Make a transaction span the whole HTTP request
         S.addAround(DB.buildLoanWrapper)

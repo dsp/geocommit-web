@@ -1,4 +1,14 @@
 <lift:surround with="default">
+
+    <lift:bind-at name="script">
+        <script type="text/javascript">
+            $(document).ready(function() {
+                geocommit_signup();
+                geocommit_map(0);
+            });
+        </script>
+    </lift:bind-at>
+
     <lift:bind-at name="content">
         <div class="column left">
             <h2 id="use" class="imgrep">Use</h2>
