@@ -19,12 +19,12 @@
 (defn- parse-geocommit-exp
   ([s k]
      (k {:long  (parse-geocommit-exp s #"(?s)geocommit \(1\.0\)\n(.*?)(?:\n\n|$)" #"\n" #":\s+")
-	 :short (parse-geocommit-exp s #"geocommit\(1\.0\):\s(.*?);" #",\s+" #"\s+")}))
+        :short (parse-geocommit-exp s #"geocommit\(1\.0\):\s(.*?);" #",\s+" #"\s+")}))
   ([s vers pairsep valsep]
-     (if-let [st (re-find vers s)]
-       (apply hash-map
-	      (mapcat #(s/split % valsep)
-		      (s/split (last st) pairsep))))))
+   (if-let [st (re-find vers s)]
+           (apply hash-map
+                  (mapcat #(s/split % valsep)
+                          (s/split (last st) pairsep))))))
 
 (defn- tonumber [^String s]
   (if s
@@ -35,17 +35,17 @@
    including ident, author, hash and message."
   [ident hash author message geocommit]
   (let [{:keys [lat long hacc vacc src dir alt speed]}
-	(keywordize-keys
-	 (merge {"hacc" nil "vacc" nil "src" nil "dir" nil "speed" nil "alt" nil}
-		(or (parse-geocommit-exp geocommit :short)
-		    (parse-geocommit-exp geocommit :long))))]
+        (keywordize-keys
+          (merge {"hacc" nil "vacc" nil "src" nil "dir" nil "speed" nil "alt" nil}
+                 (or (parse-geocommit-exp geocommit :short)
+                     (parse-geocommit-exp geocommit :long))))]
     (if (not (or (nil? long) (nil? lat)))
       (Commit. (str "geocommit:" ident ":" hash)
-	       ident hash message
-	       author (tonumber lat) (tonumber long)
-	       (tonumber hacc) (tonumber vacc)
-	       src (tonumber alt) dir
-	       "geocommit"))))
+               ident hash message
+               author (tonumber lat) (tonumber long)
+               (tonumber hacc) (tonumber vacc)
+               src (tonumber alt) dir
+               "geocommit"))))
 
 (defn isodate
   "Return a proper ISO 8601 formated date string"
@@ -53,7 +53,8 @@
   ([date]
      (.format
       (doto
-	  (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ssz") (.setTimeZone (TimeZone/getTimeZone "UTC")))
+        (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ssz")
+        (.setTimeZone (TimeZone/getTimeZone "UTC")))
       date)))
 
 (defmacro contains-all?
@@ -62,8 +63,8 @@
    Allows nested queries like (contains-all? map [:foo :bar])."
   [val & keys]
   `(if (and ~@(map (fn [s] (if (vector? s)
-			     `(-> ~val ~@s)
-			     `(-> ~val ~s))) keys))
+                             `(-> ~val ~@s)
+                             `(-> ~val ~s))) keys))
      true false))
 
 (defmacro wrap
@@ -76,13 +77,13 @@
     (try
       (f)
       (catch IllegalArgumentException iae
-	(raise :type :parse-error
-	       :message (.getMessage iae)
-	       :cause iae))
+             (raise :type :parse-error
+                    :message (.getMessage iae)
+                    :cause iae))
       (catch Exception e
-	(raise :type :service-error
-	       :message (.getMessage e)
-	       :cause e)))
+             (raise :type :service-error
+                    :message (.getMessage e)
+                    :cause e)))
     (handle :parse-error
        (println (:message *condition*))
        (print-stack-trace *condition*)
@@ -102,9 +103,9 @@
      (try
        ~@body
        (catch IllegalArgumentException ~iae
-	 (raise :type :parse-error))
+              (raise :type :parse-error))
        (catch Exception 'e
-	 (raise :type :service-error)))
+              (raise :type :service-error)))
      (handle :parse-error
        (println (:message *condition*))
        (print-stack-trace *condition*)
