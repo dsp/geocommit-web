@@ -1,6 +1,6 @@
 #!/bin/sh
 LIBS="target/scala_2.8.0/classes/"
-LIBS="${LIBS}:lib_managed/scala_2.8.0/compile/BeanstalkClient-1.4.4-SNAPSHOT.jar"
+LIBS="${LIBS}:lib_managed/scala_2.8.0/compile/BeanstalkClient-1.4.6.jar"
 LIBS="${LIBS}:lib_managed/scala_2.8.0/compile/commons-codec-1.3.jar"
 LIBS="${LIBS}:lib_managed/scala_2.8.0/compile/commons-logging-1.1.1.jar"
 LIBS="${LIBS}:lib_managed/scala_2.8.0/compile/dispatch-futures_2.8.0-0.7.4.jar"
