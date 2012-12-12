@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 echo "Warning this script will delete your geocommit and geocommit-web databases in couchdb on localhost:5984"
-read -s -p "Password for user geo@dsp.couchone.com: " passwd;
+read -s -p "Password for user geo@dsp.iriscouch.com: " passwd;
 echo
 
 localdb="http://localhost:5984"
-remotedb="http://geo:$passwd@dsp.iriscouch.com"
+remotedb="https://geo:$passwd@dsp.iriscouch.com"
 
 echo "Deleting geocommit and geocommit-web databases on $localdb"
 curl -X DELETE $localdb/geocommit > /dev/null 2>&1
