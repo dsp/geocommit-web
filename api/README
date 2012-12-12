@@ -5,15 +5,15 @@ This is the implementation of the geocommit.com HTTP API.
 ## Installation
 
 You need leiningen. You can obtain the binaries
-here https://github.com/technomancy/leiningen.
+here https://github.com/technomancy/leiningen
+or here: http://leiningen.org/#install
 
 Fetch dependencies
  $ lein deps
 Compile:
  $ lein compile
 Build and deploy a uberwar:
- $ lein appengine-prepare
- $ appcfg.sh update resources
+ $ lein ring server
 
 ## License
 
