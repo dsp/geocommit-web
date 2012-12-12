@@ -5,7 +5,7 @@ read -s -p "Password for user geo@dsp.couchone.com: " passwd;
 echo
 
 localdb="http://localhost:5984"
-remotedb="http://geo:$passwd@dsp.couchone.com"
+remotedb="http://geo:$passwd@dsp.iriscouch.com"
 
 echo "Deleting geocommit and geocommit-web databases on $localdb"
 curl -X DELETE $localdb/geocommit > /dev/null 2>&1
