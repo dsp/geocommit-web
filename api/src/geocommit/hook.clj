@@ -18,7 +18,7 @@
   (:import geocommit.services.Github
 	   geocommit.services.Bitbucket))
 
-(def *couchdb* (get-config :databases :geocommits))
+(def *couchdb* (get-config "db.geocommits"))
 (defrecord Repository [_id identifier name description repository-url vcs scanned type])
 
 (defn is-tracked?
@@ -68,7 +68,7 @@
 (defmethod update :git
   [^Service service]
   (let [unified (unify service)]
-    (and (:job (http-call-service (get-config :api :fetchservice)
+    (and (:job (http-call-service (get-config "api.fetchservice")
                                   {:identifier (:identifier unified)
                                   :repository (:repository-url unified)
                                   :commits (map #(:revision %) (:commits unified))}))
@@ -99,7 +99,7 @@
            {:keys [identifier repository-url]} c]
       (and (couch-add *couchdb*
                       (unified->repository c))
-           (:job (http-call-service (get-config :api :initscan)
+           (:job (http-call-service (get-config "api.initscan")
                                     {:identifier identifier
                                     :repository-url repository-url}))
            {:status 200}))

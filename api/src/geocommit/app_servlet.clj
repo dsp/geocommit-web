@@ -9,6 +9,7 @@
   geocommit.app_servlet
   (:gen-class :extends javax.servlet.http.HttpServlet)
   (:use compojure.core
+   [geocommit.config :only [config-use get-config]]
    [geocommit.hook :only [app-hook]]
    [geocommit.api :only [app-api-geocommits app-api-geocommit]]
    [geocommit.signup :only [app-verify-hook app-signup]])
@@ -45,5 +46,12 @@
   (route/resources "/")
   (route/not-found "not a valid request"))
 
-(def app
-     (handler/site main-routes))
+(def app (handler/site main-routes))
+
+(defn dev []
+  (do
+    (config-use (t/trace :development))
+    (get-config "foo")))
+
+(defn production []
+  (config-use (t/trace :production)))

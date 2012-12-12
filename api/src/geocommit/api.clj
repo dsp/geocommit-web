@@ -13,7 +13,7 @@
 	experimentalworks.couchdb)
   (:require [clojure.contrib.trace :as t]))
 
-(def *couchdb* (get-config :databases :geocommits))
+(def *couchdb* (get-config "db.geocommits"))
 
 (defn app-api-geocommits
   [payload]

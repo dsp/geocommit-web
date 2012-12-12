@@ -21,7 +21,7 @@
   (:require [compojure.route :as route]
    [clojure.contrib.trace :as t]))
 
-(def *couchdb* (get-config :databases :invites))
+(def *couchdb* (get-config "db.invites"))
 
 (defrecord Invite [_id date mail invitecode active verifycode verified type])
 

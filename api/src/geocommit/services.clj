@@ -20,7 +20,7 @@
     (str (.normalize
 	  (URI. (apply str
 		       (interpose "/"
-				  (concat (list (get-config :api :github)
+				  (concat (list (get-config "api.github")
 						query repo-param)
 					  parts))))))))
 
