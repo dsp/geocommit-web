@@ -7,18 +7,19 @@
        :author "David Soria Parra"}
   geocommit.signup
   (:gen-class :extends javax.servlet.http.HttpServlet)
-  (:use geocommit.core
-	geocommit.config
-	compojure.core
-	experimentalworks.couchdb
-	clojure.contrib.logging
-	clojure.contrib.json
-	clojure.contrib.java-utils
-	[ring.util.servlet :only [defservice]])
+  (:use
+    geocommit.core
+    geocommit.config
+    compojure.core
+    experimentalworks.couchdb
+    clojure.contrib.logging
+    clojure.contrib.json
+    clojure.contrib.java-utils
+    [ring.util.servlet :only [defservice]])
   (:import (org.apache.commons.validator EmailValidator)
-	   (java.util UUID))
+   (java.util UUID))
   (:require [compojure.route :as route]
-	    [clojure.contrib.trace :as t]))
+   [clojure.contrib.trace :as t]))
 
 (def *couchdb* (get-config :databases :invites))
 
@@ -51,18 +52,17 @@
   "API entry point to signup a mail address."
   [mailaddr]
   (let [code (create-verify-code)]
-    (if (and
-	 (validate-email mailaddr)
-	 (couch-add *couchdb*
-		    (Invite.
-		     (str "mail:" mailaddr)
-		     (isodate) mailaddr nil false code false "invite")))
+    (if (and (validate-email mailaddr)
+             (t/trace (couch-add *couchdb*
+                        (t/trace (Invite.
+                          (str "mail:" mailaddr)
+                          (isodate) mailaddr nil false code false "invite")))))
       (do
-	(comment (mail/send (mail/make-message
-		    :from "geocommit-team@j03.de"
-		    :to mailaddr
-		    :subject "Welcome to geocommit.com. Please verify your invitation request."
-		    :text-body (str "Welcome to geocommit.com.\n\nFollow the link to verify your invitation request\n\n"
-				    "http://geocommit.com/signup/verify/" code))))
-	{:status 201})
+        (comment (mail/send (mail/make-message
+                              :from "geocommit-team@j03.de"
+                              :to mailaddr
+                              :subject "Welcome to geocommit.com. Please verify your invitation request."
+                              :text-body (str "Welcome to geocommit.com.\n\nFollow the link to verify your invitation request\n\n"
+                                              "http://geocommit.com/signup/verify/" code))))
+        {:status 201})
       {:status 400})))

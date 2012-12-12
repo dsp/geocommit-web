@@ -71,7 +71,7 @@ function geocommit_signup () {
         $('#indicator').css('visibility', 'visible');
         $('#indicator').fadeIn(500);
         $.ajax({
-            url: "/api/signup/",
+            url: "/api/signup",
             type: "POST",
             context: document.body,
             data: {mailaddr: $('#mail').val()},
