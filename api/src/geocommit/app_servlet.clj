@@ -38,6 +38,9 @@
 	    (:request payload) (ds/slurp* (.getInputStream (:request payload)))
 	    (:body payload) (ds/slurp* (:body payload))))
 	  (app-hook (:payload (:params payload)))))
+  (GET "/" []
+       {:status 302
+       :headers {"Location" "index.html"}})
   (route/resources "/")
   (route/not-found "not a valid request"))
 
