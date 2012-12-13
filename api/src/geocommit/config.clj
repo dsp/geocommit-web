@@ -21,7 +21,7 @@
   (let [file (condp = @used-config
                     :production "production.properties"
                     "development.properties")]
-    (t/trace (.getProperty
+    (.getProperty
       (jutils/read-properties
         (File. (.toURI (jio/resource file))))
-      (t/trace key)))))
+      key)))
