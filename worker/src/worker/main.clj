@@ -3,52 +3,57 @@
               [langohr.channel :as lch]
               [langohr.queue :as lq]
               [langohr.consumers :as lc]
-              [langohr.basic :as lb]))
+              [langohr.basic :as lb]
+              [clojure.data.json :as json]))
 
 (def default-exchange-name "")
 
-(defn message-handler
-  [channel {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
-  (println (str type (String. payload "UTF-8")))
-  (lb/ack channel delivery-tag))
+(defn init
+  [repo-id, repo-url]
+  (println (str "init: " repo-id repo-url)))
 
-(defn start-consumer
-  [connection channel queue-name handler-fn]
-  (.start (Thread. #(lc/subscribe channel queue-name handler-fn :auto-ack false))))
+(defn update
+  [repo-id, repo-url, commits]
+  (println (str "update: " repo-id repo-url commits)))
+
+(defn work-dispatcher
+  [channel {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
+  (let [job  (json/read-str (String. payload "UTF-8") :key-fn keyword)]
+    (condp = type
+      "geocommit.job.init" (init (:identifier job) (:repository-url job))
+      "geocommit.job.update" (update (:identifier job) (:repository-url job) (:commits job)))
+  (lb/ack channel delivery-tag)))
+
+(defn start-worker
+  [connection channel queue-name worker-fn]
+  (.start (Thread. #(lc/subscribe channel queue-name worker-fn :auto-ack false))))
 
 (defn -main
   [& args]
   (let [connection (rmq/connect)
-        channel-fast (lch/open connection)
+        channel-default (lch/open connection)
         channel-slow (lch/open connection)]
-    (println (str "connected " (.getChannelNumber channel-fast)))
-    (lq/declare channel-fast "geocommit.job.fast" :durable true :exclusive false :auto-delete false)
-    (lq/declare channel-fast "geocommit.job.slow" :durable true :exclusive false :auto-delete false)
+    (println (str "connected " (.getChannelNumber channel-default)))
+    (lq/declare channel-default "geocommit.job.fast" :durable true :exclusive false :auto-delete false)
+    (lq/declare channel-default "geocommit.job.slow" :durable true :exclusive false :auto-delete false)
     (if (= (first args) "fill")
       (do
         (lb/publish
-          channel-fast
-          default-exchange-name
-          "geocommit.job.fast"
-          "{\"url\": \"github.com/already/exists\"}"
-          :content-type "application/json"
-          :type "geocommit.job.update")
-        (lb/publish
-          channel-slow
+          channel-default
           default-exchange-name
           "geocommit.job.slow"
-          "{\"url\": \"github.com/new/repo\"}"
+          "{\"repository-url\": \"https://github.com/peritus/geocommit\", \"identifier\": \"github.com/peritus/geocommit\"}"
           :content-type "application/json"
           :type "geocommit.job.init")
         (lb/publish
-          channel-fast
+          channel-default
           default-exchange-name
-          "geocommit.job.fast" "{\"url\": \"github.com/new/repo\"}"
+          "geocommit.job.fast" "{\"repository-url\": \"https://github.com/peritus/geocommit\", \"identifier\": \"github.com/peritus/geocommit\", \"commits\": [\"8b66817de64bea338726a1d479f42e28957bd337\", \"6b3fb2040331889642eb35f708c3c2e56dbc1ea5\"]}"
           :content-type "application/json"
           :type "geocommit.job.update")
         (rmq/close channel-fast)
         (rmq/close channel-slow)
         (rmq/close connection)) 
       (do
-        (start-consumer connection channel-fast "geocommit.job.fast" message-handler)
-        (start-consumer connection channel-slow "geocommit.job.slow" message-handler)))))
+        (start-worker connection channel-default "geocommit.job.fast" work-dispatcher)
+        (start-worker connection channel-slow "geocommit.job.slow" work-dispatcher)))))
