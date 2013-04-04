@@ -1,22 +1,22 @@
-					; geocommit.com HTTP hook API
-					; (c) 2010 David Soria Parra <dsp+geocommit@experimentalworks.net>
-					;          Nils Adermann <naderman+geocommit@naderman.de>
-					;          Filip Noetzel <filip+geocommit@j03.de>
-					; Licensed under the terms of the MIT License
+; geocommit.com HTTP hook API
+; (c) 2010 David Soria Parra <dsp+geocommit@experimentalworks.net>
+;          Nils Adermann <naderman+geocommit@naderman.de>
+;          Filip Noetzel <filip+geocommit@j03.de>
+; Licensed under the terms of the MIT License
 (ns #^{:doc "HTTP signup API functions",
        :author "David Soria Parra"}
   geocommit.hook
   (:use geocommit.core
-	geocommit.config
-	geocommit.http
-	geocommit.services
-	experimentalworks.couchdb
-	clojure.contrib.logging
-	clojure.contrib.json
-	clojure.contrib.condition)
+        geocommit.config
+        geocommit.http
+        geocommit.services
+        experimentalworks.couchdb
+        clojure.contrib.logging
+        clojure.contrib.json
+        clojure.contrib.condition)
   (:require [clojure.contrib.trace :as t])
   (:import geocommit.services.Github
-	   geocommit.services.Bitbucket))
+           geocommit.services.Bitbucket))
 
 (def *couchdb* (get-config "db.geocommits"))
 (defrecord Repository [_id identifier name description repository-url vcs scanned type])
