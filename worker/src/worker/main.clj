@@ -21,8 +21,10 @@
   (let [job  (json/read-str (String. payload "UTF-8") :key-fn keyword)]
     (condp = type
       "geocommit.job.init" (init (:identifier job) (:repository-url job))
-      "geocommit.job.update" (update (:identifier job) (:repository-url job) (:commits job)))
-  (lb/ack channel delivery-tag)))
+      "geocommit.job.update" (update (:identifier job) (:repository-url job) (:commits job))
+      false
+      )
+  (lb/ack channel 123)))
 
 (defn start-worker
   [connection channel queue-name worker-fn]
