@@ -51,7 +51,7 @@
           "geocommit.job.fast" "{\"repository-url\": \"https://github.com/peritus/geocommit\", \"identifier\": \"github.com/peritus/geocommit\", \"commits\": [\"8b66817de64bea338726a1d479f42e28957bd337\", \"6b3fb2040331889642eb35f708c3c2e56dbc1ea5\"]}"
           :content-type "application/json"
           :type "geocommit.job.update")
-        (rmq/close channel-fast)
+        (rmq/close channel-default)
         (rmq/close channel-slow)
         (rmq/close connection)) 
       (do
