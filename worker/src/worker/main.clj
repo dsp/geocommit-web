@@ -4,12 +4,14 @@
               [langohr.queue :as lq]
               [langohr.consumers :as lc]
               [langohr.basic :as lb]
-              [clojure.data.json :as json]))
+              [clojure.data.json :as json])
+    (:use worker.repository))
 
 (def default-exchange-name "")
 
 (defn init
   [repo-id, repo-url]
+  (clone (create-repo repo-id repo-url))
   (println (str "init: " repo-id repo-url)))
 
 (defn update
@@ -24,7 +26,7 @@
       "geocommit.job.update" (update (:identifier job) (:repository-url job) (:commits job))
       false
       )
-  (lb/ack channel 123)))
+  (lb/ack channel delivery-tag)))
 
 (defn start-worker
   [connection channel queue-name worker-fn]
