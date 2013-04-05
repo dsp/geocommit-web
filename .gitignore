@@ -2,5 +2,6 @@ api/classes
 api/lib
 api/resources/WEB-INF
 api/resources/*.properties
+api/target
 *~
 *.swp
