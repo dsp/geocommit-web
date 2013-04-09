@@ -3,7 +3,7 @@
         worker.main))
 
 (deftest init-test
-  (is (= nil (init "http://github.com/peritus/geocommit" "github.com/peritus/geocommit"))))
+  (is (= ["foo" "bar"] (init "github.com/peritus/geocommit" "http://github.com/peritus/geocommit"))))
 
 (deftest work-dispatcher-test
   (let [repo-url "http://github.com/peritus/geocommit"
@@ -17,9 +17,9 @@
                   langohr.basic/ack (fn [channel ^long tag] true)]
       (is (= true (work-dispatcher
                     nil
-                    {:content-type "application/json" :delivery-tags 123 :type "geocommit.job.init"}
+                    {:content-type "application/json" :delivery-tag 123 :type "geocommit.job.init"}
                     (.getBytes (str "{\"repository-url\": \"" repo-url "\", \"identifier\": \"" repo-id "\"}")))))
       (is (= true (work-dispatcher
                     nil
-                    {:content-type "application/json" :delivery-tags 123 :type "geocommit.job.update"}
+                    {:content-type "application/json" :delivery-tag 123 :type "geocommit.job.update"}
                     (.getBytes (str "{\"repository-url\": \"" repo-url "\", \"identifier\": \"" repo-id "\", \"commits\": [\"commit1\"]}"))))))))
