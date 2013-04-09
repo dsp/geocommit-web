@@ -2,9 +2,13 @@
   (:require [me.raynes.conch :refer [programs with-programs let-programs]])
   (:import (java.security MessageDigest)))
 
-(defn sha1 [obj]
-  (let [bytes (.getBytes (with-out-str (pr obj)))] 
-    (apply vector (.digest (MessageDigest/getInstance "SHA1") bytes))))
+(defn sha1 [input]
+  (apply str
+         (map (partial format "%02x")
+              (.digest (doto (MessageDigest/getInstance "SHA1")
+                             .reset
+                             (.update
+                               (.getBytes input)))))))
 
 (defn repo-dir
   [repo-id]
